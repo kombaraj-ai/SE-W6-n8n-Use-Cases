@@ -1,0 +1,467 @@
+{
+  "name": "W6-n8n-Use-Case-01",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Customer Feedback",
+        "formDescription": "We value your feedback! Let us know about your experience and what we can improve",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Name",
+              "placeholder": "Please enter your name...",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Email",
+              "fieldType": "email",
+              "placeholder": "Please enter your email...",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Feedback",
+              "fieldType": "textarea",
+              "placeholder": "Please describe your experience...",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -560,
+        96
+      ],
+      "id": "3feada47-5862-47cc-bb24-da1af6b78873",
+      "name": "On form submission",
+      "webhookId": "46ca8d58-7676-4d23-9b4c-c7b3e2ee112c"
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.Feedback }}",
+        "options": {
+          "categories": "Positive, Negative"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.sentimentAnalysis",
+      "typeVersion": 1.1,
+      "position": [
+        -352,
+        96
+      ],
+      "id": "e90b11bf-666a-4e0a-8147-4dd9e31b2990",
+      "name": "Sentiment Analysis"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        528
+      ],
+      "id": "249b4325-4239-49fe-8ca6-16f7a3358eaa",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "OZKXo0D99ocX3lZb",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1QuBbisjDhw-RWlR2EPdyFidfoQMSZVTvhIVe70d5WQE",
+          "mode": "list",
+          "cachedResultName": "Customer Feedback Form",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QuBbisjDhw-RWlR2EPdyFidfoQMSZVTvhIVe70d5WQE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Positive",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QuBbisjDhw-RWlR2EPdyFidfoQMSZVTvhIVe70d5WQE/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('On form submission').item.json.Email }}",
+            "Name": "={{ $('On form submission').item.json.Name }}",
+            "Feedback": "={{ $('On form submission').item.json.Feedback }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Feedback",
+              "displayName": "Feedback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        208,
+        -64
+      ],
+      "id": "64090049-29ed-40fa-beb0-a040284c4731",
+      "name": "Add Positive Feedback",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "xSOoz1wfwQw7mACx",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a customer support representative for an AI Automation Agency known as RockwithAI specialized in helping SME implement AI Agents and AI Automation solutions.\n\nWrite a friendly response to the customer feedback below. Format as HTML email and sign from Kombaraj at RockwithAI. Return only HTML code, do not include ```html\n\nCustomer Name:\n\n {{ $('On form submission').item.json.Name }}\n\nFeedback:\n\n{{ $('On form submission').item.json.Feedback }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        400,
+        -64
+      ],
+      "id": "7260d1cd-38dc-4b7f-9315-09c0b4d6ea34",
+      "name": "Write Positive Response"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "Thank you for your valuable feedback",
+        "message": "={{ $json.text }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        704,
+        -64
+      ],
+      "id": "86c9adfa-07f2-4621-85b2-0b2764d8f22c",
+      "name": "Send response to positive feedback",
+      "webhookId": "9041a35a-efcc-475f-9411-e5a58fe9bdd0",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bP0bJjl2D8YYicyz",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a customer support representative for an AI Automation Agency known as RockwithAI specialized in helping SME implement AI Agents and AI Automation solutions.\n\nA client jst submitted feedback about our services which you can see below.\n\nPlease provide a concise suggestion on what RockwithAI cando to address their concerns and improve client  satisfaction in the future\n\n\n\nFeedback:\n\n{{ $('On form submission').item.json.Feedback }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        208,
+        256
+      ],
+      "id": "03083a77-b4d4-4f30-afb9-1b2a76ca46a0",
+      "name": "Suggests Improvements"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1QuBbisjDhw-RWlR2EPdyFidfoQMSZVTvhIVe70d5WQE",
+          "mode": "list",
+          "cachedResultName": "Customer Feedback Form",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QuBbisjDhw-RWlR2EPdyFidfoQMSZVTvhIVe70d5WQE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1390084983,
+          "mode": "list",
+          "cachedResultName": "Negative",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QuBbisjDhw-RWlR2EPdyFidfoQMSZVTvhIVe70d5WQE/edit#gid=1390084983"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Email": "={{ $('On form submission').item.json.Email }}",
+            "Name": "={{ $('On form submission').item.json.Name }}",
+            "Feedback": "={{ $('On form submission').item.json.Feedback }}",
+            "Suggestion": "={{ $json.text }}"
+          },
+          "matchingColumns": [
+            "Email"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Feedback",
+              "displayName": "Feedback",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Suggestion",
+              "displayName": "Suggestion",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        544,
+        256
+      ],
+      "id": "fef92167-0987-41d2-b63c-688ebd48b4c6",
+      "name": "Add Negative Feedback",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "xSOoz1wfwQw7mACx",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a customer support representative for an AI Automation Agency known as RockwithAI specialized in helping SME implement AI Agents and AI Automation solutions.\n\nWrite a friendly  and concise response to the followin customer feedback. \n\nThe email should thank the client for their feedback about the services, acknowledge thei concerns, and inform that this has been escalated to our management . Offer to extend their current autmaton package with one additional AI Agent integration at no extra charge.\n\n\nFormat as HTML email and sign from Kombaraj at RockwithAI. Return only HTML code, do not include ```html\n\nCustomer Name:\n\n {{ $('On form submission').item.json.Name }}\n\nFeedback:\n\n{{ $('On form submission').item.json.Feedback }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        768,
+        256
+      ],
+      "id": "bae6b13c-b311-4e5f-b886-522c5caf9bf7",
+      "name": "Write Apology Email"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('On form submission').item.json.Email }}",
+        "subject": "We're sorry here's how we'll fix this ",
+        "message": "={{ $json.text }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1088,
+        256
+      ],
+      "id": "da56ff50-4d39-46ac-b658-d67701b3ab24",
+      "name": "Send a message",
+      "webhookId": "7a0dc0d3-fc93-42e5-9ba8-178a603100ae",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bP0bJjl2D8YYicyz",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sentiment Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Write Positive Response",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Suggests Improvements",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Write Apology Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sentiment Analysis": {
+      "main": [
+        [
+          {
+            "node": "Add Positive Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Suggests Improvements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Positive Feedback": {
+      "main": [
+        [
+          {
+            "node": "Write Positive Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Positive Response": {
+      "main": [
+        [
+          {
+            "node": "Send response to positive feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Suggests Improvements": {
+      "main": [
+        [
+          {
+            "node": "Add Negative Feedback",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Negative Feedback": {
+      "main": [
+        [
+          {
+            "node": "Write Apology Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Apology Email": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "0f5b12ef-75af-4eb8-a1d3-299da8a36a83",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4b013bb6bcb5f625a09342b85cb375f03616b3ad9ad7fd9c4d6475be09f2ca08"
+  },
+  "id": "gcD46v0vxhHusmVn",
+  "tags": []
+}
