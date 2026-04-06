@@ -1,4 +1,4 @@
-# W6-n8n-Use-Case-03 - Multi-Agent Workflow
+# W6-n8n-Use-Case-05 - Multi-Agent Workflow
 ---
 
 ## Table of Contents
