@@ -11,3 +11,5 @@
 [Use Case 03 - YouTube Shorts](Use%20Case%203/W6-n8n-Use-Case-03.md)
 
 [Use Case 04 - EMail Classification](Use%20Case%204/W6-n8n-Use-Case-04.md)
+
+[Use Case 05 - Multi Agentic Workflow](Use%20Case%205/W6-n8n-Use-Case-05.md)
